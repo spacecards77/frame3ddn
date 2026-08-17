@@ -152,9 +152,16 @@ namespace Frame3ddn
 
                     /* error checking */
 
-                    if (W[lc, i, 4] == 0 && W[lc, i, 5] == 0 &&
-                         W[lc, i, 8] == 0 && W[lc, i, 9] == 0 &&
-                         W[lc, i, 12] == 0 && W[lc, i, 13] == 0)
+                    // Upstream C keeps the element number in W[lc][i][1] and the twelve values in
+                    // W[lc][i][2..13], so its "all zero" test on 4,5,8,9,12,13 means the six load
+                    // intensities. This port stores the element number in W[lc,i,0] and the values
+                    // in W[lc,i,1..12], so every index shifts down by one. Copying the C indices
+                    // verbatim both tested locations instead of loads and read W[lc,i,13], which is
+                    // past the end of a 13-column array -- an IndexOutOfRangeException for any
+                    // segment starting at x = 0 whose end intensity is zero.
+                    if (W[lc, i, 3] == 0 && W[lc, i, 4] == 0 &&
+                         W[lc, i, 7] == 0 && W[lc, i, 8] == 0 &&
+                         W[lc, i, 11] == 0 && W[lc, i, 12] == 0)
                     {
                         Console.WriteLine($"   Warning: All trapezoidal loads applied to frame element {n}  are zero");
                         Console.WriteLine($"     load case: {lc} , element {n} , load {i}");
